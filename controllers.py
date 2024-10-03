@@ -6,11 +6,11 @@ PAGE_SIZE = 10
 
 def get_all_ingredients_func():
     query = {
-        "size": 0,  # We are only interested in the aggregation result
+        "size": 0,
         "aggs": {
             "distinct_ingredients": {
                 "terms": {
-                    "field": "categories.keyword",  # Use .keyword for exact matching of strings
+                    "field": "categories.keyword",
                     "size": 100000
                 }
             }
@@ -35,25 +35,14 @@ def get_relevant_titles_func(value):
             }
         }
     }
-
     response = client.search(index=INDEX_NAME, body=query)
-    # with open('distinct_ingredients.json', 'w') as f:
-    #     json.dump(response, f, indent=4)
-    with open('getTitles.json', 'w') as f:
-        json.dump(response, f, indent=4)
-
-    return response["hits"]["hits"]
-
-    # distinct_ingredients = [
-    #     bucket['key'] for bucket in response['aggregations']['distinct_ingredients']['buckets']
-    #     if value.lower() in bucket['key'].lower()
-    # ][:10]
-    # return distinct_ingredients
+    titles = [hit["_source"]["title"] for hit in response["hits"]["hits"]]
+    return titles
 
 
 def get_min_max_field_func(field):
     query = {
-        "size": 0,  # No need for actual documents, just aggregations
+        "size": 0,
         "aggs": {
             "min_calories": {
                 "min": {
@@ -68,14 +57,9 @@ def get_min_max_field_func(field):
         }
     }
 
-    # Execute the search query
     response = client.search(index=INDEX_NAME, body=query)
-
-    # Extract min and max values from the response
     min_calories = response['aggregations']['min_calories']['value']
     max_calories = response['aggregations']['max_calories']['value']
-
-    # Display the results
     print(f"Minimum {field}: {min_calories}")
     print(f"Maximum {field}: {max_calories}")
 
@@ -132,7 +116,7 @@ def get_recipies_func(dish_name, ingredients, ranges_apply, min_rating, sodium_r
             "sort": [
                 {
                     "fat": {
-                        "order": "desc"  
+                        "order": "desc"
                     }
                 }
             ],
@@ -173,51 +157,7 @@ def get_recipies_func(dish_name, ingredients, ranges_apply, min_rating, sodium_r
         }
         query['query']['bool']["must"].append(dish_filter)
 
-    # query = {
-    #         "from": page*PAGE_SIZE,
-    #         "size": PAGE_SIZE,
-    #         "track_total_hits": True,
-    #         "query": {
-    #             "bool": {
-    #                 "must": [
-    #                     {"match": {"title": dish_name}},
-    #                     {"range": {"rating": {"gte": min_rating}}},
-    #                     {"terms_set": {
-    #                         "categories.keyword": {
-    #                             "terms": ingredients,
-    #                             "minimum_should_match_script": {
-    #                                 "source": str(len(ingredients))
-    #                             }
-    #                         }
-    #                     }},
-    #                 ]
-    #                 + [
-    #                     create_range_or_null_query_func(
-    #                         "sodium", sodium_range),
-    #                     create_range_or_null_query_func("fat", fat_range),
-    #                     create_range_or_null_query_func(
-    #                         "calories", calories_range),
-    #                     create_range_or_null_query_func(
-    #                         "protein", protein_range)
-    #                 ],
-    #             }
-    #         }
-    #     }
-
     response = client.search(index=INDEX_NAME, body=query)
 
     total_records = response["hits"]["total"]["value"]
-
-    with open("get_recipies.json", 'w') as f:
-        json.dump(response, f, indent=4)
-
-        # print(total_records)
     return {"total_pages": math.ceil(total_records/PAGE_SIZE), "page": page, "data": response["hits"]["hits"]}
-
-    # Print the results
-    # with open('get_recipies.json', 'w') as f:
-    #         json.dump(response, f, indent=4)
-    # print(len(response["hits"]["hits"]))
-
-
-# get_recipies_func()

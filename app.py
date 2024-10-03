@@ -25,7 +25,7 @@ def get_relevant_titles():
 
 @app.route('/get_recipes', methods=['POST'])
 def get_recipes():
-    data = request.get_json()  # Get JSON data from the request body
+    data = request.get_json()
     dish_name = data.get('dish_name', '')
     ingredients = data.get('ingredients', [])
     ranges_apply = data.get('ranges_apply', False)
@@ -38,38 +38,9 @@ def get_recipes():
     sortby = data.get('sortby', '_score')
     order = data.get('order', "desc")
 
-    print(type(ingredients))
-    print(ingredients)
-
-    # Implement logic to fetch recipes based on the provided data
-    # For demonstration, this is a mock return structure
-    # recipes = [{
-    #     "title": "Tomato and Lettuce Salad",
-    #     "ingredients": ["tomato", "lettuce", "olive oil"],
-    #     "rating": 4.5
-    # }] if dish_name else []
-    fetched_data = {
-        "dish_name": dish_name,
-        "ingredients": ingredients,
-        "ranges_apply": ranges_apply,
-        "min_rating": min_rating,
-        "sodium_range": sodium_range,
-        "fat_range": fat_range,
-        "calories_range": calories_range,
-        "protein_range": protein_range,
-        "sorted": sorted,
-        "page": page,
-        "sortby": sortby,
-        "order": order
-    }
-
-    # print(fetched_data)
-
     return jsonify({
         "status": "success",
         "data" : get_recipies_func(dish_name,ingredients,ranges_apply,min_rating,sodium_range,fat_range,calories_range,protein_range,page,sortby,order)
-        # "recipes": recipes
-
     })
 
 

@@ -8,7 +8,6 @@ ADMIN = os.getenv('ADMIN')
 PASSWORD = os.getenv('PASSWORD')
 
 client = OpenSearch(
-    # hosts=[{'host': 'opensearch-net', 'port': 9200}],
     hosts=[{'host': 'localhost', 'port': 9200}],
     http_auth=(ADMIN, PASSWORD),
     use_ssl=True,
@@ -43,18 +42,6 @@ else:
 # if __name__=="__main__":
 
     # response = client.indices.delete(index=INDEX_NAME)
-
-
-
-    # with open("indices.json",'w') as f:
-    #     json.dump(indices_info,f,indent=4)
-
-
-    
-
-    # fields_mapping = client.indices.get_mapping(INDEX_NAME)
-    # with open("mappings.json",'w') as f:
-    #     json.dump(fields_mapping,f,indent=4)
 
 
 
