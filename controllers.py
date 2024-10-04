@@ -188,5 +188,3 @@ def get_recipies_func(dish_name, ingredients, ranges_apply, min_rating, sodium_r
     # return response
     return {"total_pages": math.ceil(total_records/PAGE_SIZE), "page": page, "data": response["hits"]["hits"]}
 
-
-# get_relevant_titles_func("chick fhy ")
