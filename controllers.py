@@ -1,5 +1,7 @@
 from client import *
 import math
+import re
+
 
 PAGE_SIZE = 10
 
@@ -26,16 +28,38 @@ def get_all_ingredients_func():
     return distinct_ingredients
 
 
-def get_relevant_titles_func(value):
+def get_relevant_ings_func(value):
     query = {
         "size": 10,
         "query": {
             "match": {
-                "title": value
+                "categories.keyword": value
             }
         }
     }
     response = client.search(index=INDEX_NAME, body=query)
+    with open('rel_ind.json', 'w') as f:
+        json.dump(response, f, indent=4)
+
+
+def get_relevant_titles_func(value):
+    terms = re.split('[,"\s]+', value)  # This regex now correctly splits on space characters as well
+    print(terms)
+    query = {
+        "size": 10,
+        "query": {
+            "bool": {
+                "should": [],
+                "minimum_should_match": 1
+            }
+        }
+    }
+     
+    for term in terms:
+        query["query"]["bool"]["should"].append({"match": {"title": {"query" : term , "fuzziness": "AUTO"}}})
+    response = client.search(index=INDEX_NAME, body=query)
+    with open('get_titles.json','w') as f:
+        json.dump(response,f,indent=4)
     titles = [hit["_source"]["title"] for hit in response["hits"]["hits"]]
     return titles
 
@@ -87,7 +111,8 @@ def get_recipies_func(dish_name, ingredients, ranges_apply, min_rating, sodium_r
             ],
             "query": {
                 "bool": {
-                    "must": [],
+                    "should": [],
+                    "minimum_should_match" : None,
                     "filter": [
                         {
                             "range": {
@@ -115,14 +140,15 @@ def get_recipies_func(dish_name, ingredients, ranges_apply, min_rating, sodium_r
             "track_total_hits": True,
             "sort": [
                 {
-                    "fat": {
-                        "order": "desc"
+                    sortby: {
+                        "order": order
                     }
                 }
             ],
             "query": {
                 "bool": {
-                    "must": [],
+                    "should": [],
+                    "minimum_should_match": None,
                     "filter": [
                         {
                             "range": {
@@ -150,14 +176,17 @@ def get_recipies_func(dish_name, ingredients, ranges_apply, min_rating, sodium_r
         query['query']['bool']['filter'].append(ingredients_filter)
 
     if (dish_name != ""):
-        dish_filter = {
-            "match": {
-                "title": dish_name
-            }
-        }
-        query['query']['bool']["must"].append(dish_filter)
+        terms = re.split('[,"\s]+', dish_name) 
+        for term in terms:
+            query["query"]["bool"]["should"].append({"match": {"title": {"query" : term , "fuzziness": "AUTO"}}})
+        # query['query']['bool']["must"].append(dish_filter)
+        query["query"]["bool"]["minimum_should_match"] = 1
 
     response = client.search(index=INDEX_NAME, body=query)
 
     total_records = response["hits"]["total"]["value"]
+    # return response
     return {"total_pages": math.ceil(total_records/PAGE_SIZE), "page": page, "data": response["hits"]["hits"]}
+
+
+# get_relevant_titles_func("chick fhy ")

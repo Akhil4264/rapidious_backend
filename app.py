@@ -18,8 +18,7 @@ def get_relevant_titles():
     value = request.args.get('value', '')    
     return jsonify({
         "status": "success",
-        "value" : value,
-        "ingredients": get_relevant_titles_func(value)
+        "titles": get_relevant_titles_func(value)
     })
 
 
@@ -42,6 +41,9 @@ def get_recipes():
         "status": "success",
         "data" : get_recipies_func(dish_name,ingredients,ranges_apply,min_rating,sodium_range,fat_range,calories_range,protein_range,page,sortby,order)
     })
+   
+
+
 
 
 @app.route('/', methods=['GET'])
