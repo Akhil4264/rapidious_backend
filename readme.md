@@ -76,6 +76,8 @@ This project is the backend component of the Rapidious application, built with P
 
     Clone the frontend repository from: https://github.com/Akhil4264/rapidious_frontend
 
+Youtube demo : https://www.youtube.com/watch?v=FEp1_tlze5I
+
 
 
 

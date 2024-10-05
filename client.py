@@ -39,9 +39,9 @@ else:
     print(f"Data sent to your OpenSearch.")
 
 
-# if __name__=="__main__":
+if __name__=="__main__":
 
-    # response = client.indices.delete(index=INDEX_NAME)
+    response = client.indices.delete(index=INDEX_NAME)
 
 
 
